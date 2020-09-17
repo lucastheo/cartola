@@ -1,18 +1,16 @@
 from bs4 import BeautifulSoup
 import re
 import json
+from estruturas.enumerados.chaves_dict import KEY
 
-_JOGOS___ = "jogos"
-_RODADAS_ = "rodadas"
-_TIMES___ = "times"
-_ANO_____ = "ano"
-_DATA_H_ = "data-hora"
-_TIME_C_ = "time-casa"
-_TIME_F_ = "time-fora"
+_JOGOS___ = KEY.JOGOS__
+_RODADAS_ = KEY.RODADAS
+_TIMES___ = KEY.TIMES__
+_ANO_____ = KEY.ANO____
+_DATA_H_  = KEY.DATA_H_
+_TIME_C_  = KEY.TIME_C_
+_TIME_F_  = KEY.TIME_F_
 
-
-#def get_jogos( page:str ):
-    
 def extrair( page: str ):
     soup = BeautifulSoup( page , "lxml" )
     out = dict()
@@ -21,11 +19,11 @@ def extrair( page: str ):
     out[_TIMES___] = set()
     out[_ANO_____] = EXTRAIR.ano( soup)
     soup_base = PERCORE.rodadas( soup )
-    for soup_rodada in PERCORE.rodada( soup ):
+    for soup_rodada in PERCORE.rodada( soup_base ):
         rodada = EXTRAIR.rodada_str( soup_rodada )
         out[_RODADAS_].add( rodada )
         
-        for soup_jogo in PERCORE.jogos():
+        for soup_jogo in PERCORE.jogos(soup_rodada):
             out_informacoes_jogo = dict()
             out_informacoes_jogo[_DATA_H_] = EXTRAIR.data_hora( soup_jogo )
             
@@ -54,8 +52,8 @@ class PERCORE:
         return soup_base.find_all("div" , class_ = "swiper-slide")
 
     @staticmethod
-    def jogos(soup_rodadas:BeautifulSoup):
-        return soup_rodadas.find("ul").find_all("li")
+    def jogos(soup_rodada:BeautifulSoup):
+        return soup_rodada.find("ul").find_all("li")
     
     @staticmethod
     def time( soup_jogos:BeautifulSoup ):
@@ -63,8 +61,8 @@ class PERCORE:
     
 class EXTRAIR:
     @staticmethod
-    def rodada_str(soup_rodadas:BeautifulSoup):
-        return soup_rodadas.find("header").find("h3").string
+    def rodada_str(soup_rodada:BeautifulSoup):
+        return soup_rodada.find("header").find("h3").string
 
     @staticmethod
     def data_hora( soup_jogo:BeautifulSoup ):
